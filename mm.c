@@ -74,7 +74,9 @@ team_t team = {
 #define NEXT_BLKP(bp) ( (char*)(bp) + GET_SIZE(( (char*)(bp) - WSIZE) )) // GET_SIZE로 현재 블록의 크기 얻은다음 그 만큼 + 하면 다음 블럭 bp로감.
 #define PREV_BLKP(bp) ( (char*)(bp) - GET_SIZE(( (char*)(bp) - DSIZE) )) // GET_SIZE로 이전 블록의 크기를 얻은 다음 그 만큼 - 하면 전 블럭 bp로감
 
-static char *heap_listp; //처음에 쓸 큰 가용블록 합을 만들기
+static char *heap_listp = NULL; //처음에 쓸 큰 가용블록 합을 만들기
+
+
 
 // 블록 연결하기
 static void *coalesce(void *bp)
@@ -124,6 +126,7 @@ static void *extend_heap(size_t words)
 {
     char *bp;
     size_t size; 
+
     // 홀수인 경우 짝수로 조정(alignment유지)
     size = (words % 2) ? (words + 1) * WSIZE : words * WSIZE; // 8의 배수 맞추기 위함
 
@@ -185,7 +188,7 @@ int mm_init(void)
 //     return NULL; 
 // }
 
-static char *heap_listp = NULL;  // 전역으로 힙의 시작 주소를 관리
+// static char *heap_listp = NULL;  // 전역으로 힙의 시작 주소를 관리
 static char *last_bp = NULL;     // 마지막으로 반환하거나 탐색한 블록의 위치
 
 //next-fit
@@ -217,31 +220,6 @@ static void *find_fit(size_t asize)
     // 적합한 블록을 찾지 못했으면 NULL 반환
     return NULL;
 }
-
-// static char *heap_listp = NULL;  // 전역으로 힙의 시작 주소를 관리
-
-// // 힙에서 asize 크기의 블록을 찾는 best-fit 방식의 함수
-// static void *find_fit(size_t asize)
-// {
-//     char *bp;
-//     char *best_fit = NULL;
-//     size_t smallest_diff = (size_t)-1; // 최소 차이를 저장, 초기값은 최대 크기
-
-//     for (bp = heap_listp; GET_SIZE(HDRP(bp)) > 0; bp = NEXT_BLKP(bp)) {
-//         size_t csize = GET_SIZE(HDRP(bp));
-//         if (!GET_ALLOC(HDRP(bp)) && (asize <= csize)) {
-//             size_t diff = csize - asize;
-//             if (diff < smallest_diff) {
-//                 smallest_diff = diff;
-//                 best_fit = bp;
-//                 if (diff == 0) break; // 완벽하게 맞는 블록을 찾은 경우 더 이상 탐색하지 않음
-//             }
-//         }
-//     }
-
-//     return best_fit; // 가장 적합한 블록의 주소를 반환, 적합한 블록을 찾지 못했다면 NULL 반환
-// }
-
 
 // 블록 할당. 필요시 남은 부분 다시 가용 블록
 static void place(void *bp, size_t asize)
